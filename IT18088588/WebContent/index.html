@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./js/axios.min.js"></script>
+</head>
+<style>
+		
+		body {
+  			background-image: url('Image/background.jpg');
+  			background-repeat: no-repeat;
+  			background-attachment: fixed;
+  			background-size: 100% 100%;
+		}
+		
+    .testBtn {
+        width: 100px;
+        padding: 5px 10px;
+        background: #0B5345;
+        color: #fff;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        
+    }
+
+    #mytable {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    #mytable td,
+    #mytable th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #mytable tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    #mytable tr:hover {
+        background-color: #ddd;
+    }
+
+    #mytable th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #138D75;
+        color: white;
+    }Insert
+
+    span{
+    	cursor: pointer;
+    }
+</style>
+
+
+<body>
+	<div align="right">
+    <form>
+        <input type="hidden" name="id" id="formId"/><br />
+        <b>Name:<input type="text" name="name" id="formName" /></b><br />
+        <b>Email:<input type="text" name="email" id="formEmail" /></b><br />
+        <b>Address:<input type="text" name="address" id="formAddress" /></b><br />
+        <b>Contact No:<input type="text" name="contactno" id="formContactno" /></b>
+    </form>
+    </div>
+    
+    <div align="right">
+    <br />
+    <div class="testBtn" onclick="insertData()">Insert </div>
+    <div class="testBtn" onclick="updateData()">Update</div>
+    </div>
+    <br />
+    <br />
+    <table id="mytable">
+        <thead id="myhead">
+            <tr>
+                <th>Patient Id</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Contact Number</th>
+                <th>Update Details</th>
+                <th>Delete Details</th>
+            </tr>
+        </thead>
+        <tbody id="mybody">
+        </tbody>
+    </table>
+    <br />
+    <br />
+    <br />
+</body>
+
+
+<script>
+    testFunction();
+    function testFunction() {
+        axios({
+            method: 'get',
+            url: 'http://localhost:8080/PatientManagementService/rest/patient'
+        }).then(function (response) {
+            var final_data = response.data.Data;
+            var final_error = response.data.Error;
+            var tbody = document.getElementById("mybody");
+            cleanData();
+            if (final_error.error_code == 0) {
+
+                for (let i = 0; i < final_data.length; i++) {
+                    var row = tbody.insertRow(i);
+                    row.insertCell(0).innerHTML = final_data[i].id;
+                    row.insertCell(1).innerHTML = final_data[i].name;
+                    row.insertCell(2).innerHTML = final_data[i].email;
+                    row.insertCell(3).innerHTML = final_data[i].address;
+                    row.insertCell(4).innerHTML = final_data[i].contactno;
+                    row.insertCell(5).innerHTML = "<span onclick=\"updateMe(\'" + final_data[i].id + "\',\'" + final_data[i].name + "\',\'" + final_data[i].email + "\',\ '" + final_data[i].address + "\',\'" + final_data[i].contactno + "\') \">Update</span>";
+                    row.insertCell(6).innerHTML = "<span onclick=\"deleteMe(\'" + final_data[i].id + "\',\'" + final_data[i].name + "\',\'" + final_data[i].email + "\',\ '" + final_data[i].address + "\',\'" + final_data[i].contactno + "\') \">Delete</span>";
+                }
+            }
+
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    function cleanData() {
+        var tbody = document.getElementById("mybody");
+        tbody.innerHTML = "";
+    }
+
+
+
+    function insertData() {
+        axios.post(
+            'http://localhost:8080/PatientManagementService/rest/patient',
+            {
+                "email": document.getElementById("formEmail").value,
+                "name": document.getElementById("formName").value,
+                "address": document.getElementById("formAddress").value,
+                "contactno": document.getElementById("formContactno").value
+            }
+        ).then(function (response) {
+            testFunction();
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    function updateData() {
+        axios.put(
+            'http://localhost:8080/PatientManagementService/rest/patient',
+            {
+                "id": document.getElementById("formId").value,
+                "email": document.getElementById("formEmail").value,
+                "name": document.getElementById("formName").value,
+                "address": document.getElementById("formAddress").value,
+                "contactno": document.getElementById("formContactno").value
+            }
+        ).then(function (response) {
+            testFunction();
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    function deleteData(id) {
+        axios({
+            method: 'delete',
+            url: 'http://localhost:8080/PatientManagementService/rest/patient/'+id
+        }).then(function (response) {
+            testFunction();
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    function updateMe(id,name,email,address,contactno){
+        document.getElementById("formId").value = id;
+        document.getElementById("formEmail").value = email;
+        document.getElementById("formName").value = name;
+        document.getElementById("formAddress").value = address;
+        document.getElementById("formContactno").value = contactno;
+    }
+
+    function deleteMe(id,name,email,address,contactno){
+        document.getElementById("formId").value = "";
+        document.getElementById("formEmail").value = "";
+        document.getElementById("formName").value = "";
+        document.getElementById("formAddress").value = "";
+        document.getElementById("formContactno").value = "";
+        deleteData(id);
+        testFunction();
+    }
+</script>
+
+</html>
